@@ -195,8 +195,24 @@ export async function extractZipToFS(
       continue;
     }
 
+    // Prevent zip slip: reject entries that attempt path traversal or absolute paths.
+    // A safe relative path must not start with "/" and must not contain any ".." segment
+    // after normalizing separators.
+    const normalizedRelative = relativePath.replace(/\\/g, "/");
+    if (
+      normalizedRelative.startsWith("/") ||
+      normalizedRelative
+        .split("/")
+        .some((segment) => segment === "..")
+    ) {
+      console.warn(
+        `[ZIP Utils] Skipping unsafe path in zip (path traversal): ${path}`,
+      );
+      continue;
+    }
+
     // Construct full path in ZenFS
-    const fullPath = `${targetPath}/${relativePath}`;
+    const fullPath = `${targetPath}/${normalizedRelative}`;
 
     // Create parent directories if needed
     const parentDir = fullPath.substring(0, fullPath.lastIndexOf("/"));
