@@ -201,9 +201,7 @@ export async function extractZipToFS(
     const normalizedRelative = relativePath.replace(/\\/g, "/");
     if (
       normalizedRelative.startsWith("/") ||
-      normalizedRelative
-        .split("/")
-        .some((segment) => segment === "..")
+      normalizedRelative.split("/").some((segment) => segment === "..")
     ) {
       console.warn(
         `[ZIP Utils] Skipping unsafe path in zip (path traversal): ${path}`,
